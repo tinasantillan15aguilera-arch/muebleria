@@ -1,6 +1,6 @@
 // Registro de IA / PWA: Service Worker para Mueblería Santillán
 
-const VERSION = "v1";
+const VERSION = "v2";
 const ARCHIVOS = [
     "./",
     "./index.html",

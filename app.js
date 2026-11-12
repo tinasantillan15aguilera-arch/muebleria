@@ -851,7 +851,6 @@ async function exportarDatosJSON() {
     const blob = new Blob([contenidoJSON], { type: "application/json" });
     const archivo = new File([blob], "muebleria.json", { type: "application/json" });
 
-    // Si el celular soporta compartir archivos, usamos navigator.share
     if (navigator.share && navigator.canShare && navigator.canShare({ files: [archivo] })) {
         try {
             await navigator.share({
@@ -864,12 +863,11 @@ async function exportarDatosJSON() {
             if (error.name !== 'AbortError') {
                 console.log("Error al compartir, usando descarga tradicional:", error);
             } else {
-                return; // Si el usuario canceló el menú compartir, no hace nada
+                return;
             }
         }
     }
 
-    // Fallback: descarga tradicional por enlace temporal
     const urlTemporal = URL.createObjectURL(blob);
     const enlaceTemporal = document.createElement("a");
     enlaceTemporal.href = urlTemporal;
@@ -966,19 +964,21 @@ const bannerConexion = document.createElement("div");
 bannerConexion.id = "aviso-conexion-pwa";
 bannerConexion.style.cssText = `
     display: none;
-    background-color: #fff3cd;
-    color: #856404;
+    background-color: #ffcc00;
+    color: #000000;
     text-align: center;
-    padding: 0.5rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    border-bottom: 1px solid #ffeeba;
-    position: sticky;
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 100%;
+    position: fixed;
     top: 0;
-    z-index: 1000;
+    left: 0;
+    z-index: 99999;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 `;
-bannerConexion.textContent = "Sin conexión: tus datos se siguen guardando en este celular";
-document.body.insertBefore(bannerConexion, document.body.firstChild);
+bannerConexion.textContent = "⚠️ Sin conexión: tus datos se siguen guardando en este celular";
+document.body.appendChild(bannerConexion);
 
 function actualizarEstadoConexion() {
     if (!navigator.onLine) {
