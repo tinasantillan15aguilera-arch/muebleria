@@ -1,6 +1,6 @@
 // Registro de IA / PWA: Service Worker para Mueblería Santillán
 
-const VERSION = "v3";
+const VERSION = "v4";
 const ARCHIVOS = [
     "./",
     "./index.html",
@@ -11,11 +11,11 @@ const ARCHIVOS = [
     "./icono-512.png"
 ];
 
-// 1. EVENTO INSTALL: Guarda todos los archivos en la caché y avisa si hay nueva versión
+// 1. EVENTO INSTALL: Guarda todos los archivos en la caché
 self.addEventListener("install", (evento) => {
     evento.waitUntil(
         caches.open(VERSION).then((cache) => {
-            console.log("Service Worker (v3): Guardando archivos actualizados...");
+            console.log("Service Worker (v4): Guardando archivos actualizados...");
             return cache.addAll(ARCHIVOS);
         })
     );

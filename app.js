@@ -1002,7 +1002,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // =========================================
-// 11. REGISTRO Y AVISO DE NUEVA VERSIÓN DE PWA (Paso 8)
+// 11. REGISTRO Y AVISO DE NUEVA VERSIÓN DE PWA
 // =========================================
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
@@ -1010,13 +1010,11 @@ if ("serviceWorker" in navigator) {
             .then(reg => {
                 console.log("Service Worker registrado con éxito:", reg.scope);
 
-                // Detectar si hay un nuevo Service Worker esperando para activarse
                 reg.addEventListener("updatefound", () => {
                     const nuevoWorker = reg.installing;
                     if (nuevoWorker) {
                         nuevoWorker.addEventListener("statechange", () => {
                             if (nuevoWorker.state === "installed" && navigator.serviceWorker.controller) {
-                                // Mostrar el aviso elegante en pantalla
                                 mostrarAvisoActualizacion();
                             }
                         });
@@ -1028,7 +1026,6 @@ if ("serviceWorker" in navigator) {
 }
 
 function mostrarAvisoActualizacion() {
-    // Evitar duplicar el banner si ya existe
     if (document.getElementById("aviso-nueva-version")) return;
 
     const bannerActualizacion = document.createElement("div");
