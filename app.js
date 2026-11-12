@@ -833,7 +833,7 @@ function renderizarTablaAdmin() {
 }
 
 // =========================================
-// 9. MÓDULO DE IMPORTACIÓN Y EXPORTACIÓN INTELIGENTE (Paso 7: navigator.share)
+// 9. MÓDULO DE IMPORTACIÓN Y EXPORTACIÓN INTELIGENTE
 // =========================================
 
 const botonExportar = document.getElementById("boton-exportar");
@@ -957,7 +957,7 @@ if (archivoImportar) {
 
 
 // =========================================
-// 10. AVISO DISCRETO DE CONEXIÓN (Paso 7: online / offline)
+// 10. AVISO DISCRETO DE CONEXIÓN (online / offline)
 // =========================================
 
 const bannerConexion = document.createElement("div");
@@ -1002,12 +1002,74 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // =========================================
-// 11. REGISTRO DEL SERVICE WORKER (PWA)
+// 11. REGISTRO Y AVISO DE NUEVA VERSIÓN DE PWA (Paso 8)
 // =========================================
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-            .then(reg => console.log("Service Worker registrado con éxito:", reg.scope))
+            .then(reg => {
+                console.log("Service Worker registrado con éxito:", reg.scope);
+
+                // Detectar si hay un nuevo Service Worker esperando para activarse
+                reg.addEventListener("updatefound", () => {
+                    const nuevoWorker = reg.installing;
+                    if (nuevoWorker) {
+                        nuevoWorker.addEventListener("statechange", () => {
+                            if (nuevoWorker.state === "installed" && navigator.serviceWorker.controller) {
+                                // Mostrar el aviso elegante en pantalla
+                                mostrarAvisoActualizacion();
+                            }
+                        });
+                    }
+                });
+            })
             .catch(err => console.error("Error al registrar el Service Worker:", err));
+    });
+}
+
+function mostrarAvisoActualizacion() {
+    // Evitar duplicar el banner si ya existe
+    if (document.getElementById("aviso-nueva-version")) return;
+
+    const bannerActualizacion = document.createElement("div");
+    bannerActualizacion.id = "aviso-nueva-version";
+    bannerActualizacion.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #2c3e50;
+        color: #ffffff;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        text-align: center;
+        z-index: 999999;
+        font-family: system-ui, sans-serif;
+        font-size: 0.95rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        width: 90%;
+        max-width: 400px;
+    `;
+    
+    bannerActualizacion.innerHTML = `
+        <span>✨ Hay una versión nueva: cerrá y volvé a abrir la app</span>
+        <button id="btn-recargar-app" style="
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        ">Actualizar Ahora</button>
+    `;
+
+    document.body.appendChild(bannerActualizacion);
+
+    document.getElementById("btn-recargar-app").addEventListener("click", () => {
+        window.location.reload();
     });
 }
