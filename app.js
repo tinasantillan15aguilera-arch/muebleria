@@ -833,14 +833,14 @@ function renderizarTablaAdmin() {
 }
 
 // =========================================
-// 9. MÓDULO DE IMPORTACIÓN Y EXPORTACIÓN DE DATOS
+// 9. MÓDULO DE IMPORTACIÓN Y EXPORTACIÓN INTELIGENTE (Paso 7: navigator.share)
 // =========================================
 
 const botonExportar = document.getElementById("boton-exportar");
 const archivoImportar = document.getElementById("archivo-importar");
 const errorImportacionElem = document.getElementById("error-importacion");
 
-function exportarDatosJSON() {
+async function exportarDatosJSON() {
     const estadoCompleto = {
         productos: productos,
         carrito: carrito,
@@ -849,8 +849,28 @@ function exportarDatosJSON() {
 
     const contenidoJSON = JSON.stringify(estadoCompleto, null, 2);
     const blob = new Blob([contenidoJSON], { type: "application/json" });
-    const urlTemporal = URL.createObjectURL(blob);
+    const archivo = new File([blob], "muebleria.json", { type: "application/json" });
 
+    // Si el celular soporta compartir archivos, usamos navigator.share
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+        try {
+            await navigator.share({
+                title: 'Mueblería Santillán - Respaldo JSON',
+                text: 'Adjunto el archivo de respaldo con los datos de la mueblería.',
+                files: [archivo]
+            });
+            return;
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.log("Error al compartir, usando descarga tradicional:", error);
+            } else {
+                return; // Si el usuario canceló el menú compartir, no hace nada
+            }
+        }
+    }
+
+    // Fallback: descarga tradicional por enlace temporal
+    const urlTemporal = URL.createObjectURL(blob);
     const enlaceTemporal = document.createElement("a");
     enlaceTemporal.href = urlTemporal;
     enlaceTemporal.download = "muebleria.json";
@@ -937,17 +957,52 @@ if (archivoImportar) {
     archivoImportar.addEventListener("change", importarDatosJSON);
 }
 
+
+// =========================================
+// 10. AVISO DISCRETO DE CONEXIÓN (Paso 7: online / offline)
+// =========================================
+
+const bannerConexion = document.createElement("div");
+bannerConexion.id = "aviso-conexion-pwa";
+bannerConexion.style.cssText = `
+    display: none;
+    background-color: #fff3cd;
+    color: #856404;
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-bottom: 1px solid #ffeeba;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+`;
+bannerConexion.textContent = "Sin conexión: tus datos se siguen guardando en este celular";
+document.body.insertBefore(bannerConexion, document.body.firstChild);
+
+function actualizarEstadoConexion() {
+    if (!navigator.onLine) {
+        bannerConexion.style.display = "block";
+    } else {
+        bannerConexion.style.display = "none";
+    }
+}
+
+window.addEventListener("online", actualizarEstadoConexion);
+window.addEventListener("offline", actualizarEstadoConexion);
+
 // Inicialización general al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
     renderizarCatalogo();
     renderizarTablaAdmin();
     renderizarCarrito();
     renderizarPresupuestosGuardados();
+    actualizarEstadoConexion();
 });
 
 
 // =========================================
-// 10. REGISTRO DEL SERVICE WORKER (PWA)
+// 11. REGISTRO DEL SERVICE WORKER (PWA)
 // =========================================
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
